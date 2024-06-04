@@ -1,0 +1,35 @@
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  
+  .input {
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  .list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .listItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .todoText {
+    cursor: pointer;
+  }
+  
