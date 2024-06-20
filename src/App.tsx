@@ -1,22 +1,20 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from './store';
+import { addTodo, toggleTodo, removeTodo, editTodo, saveTodos } from './store/todosSlice';
 import './App.css';
 
-interface Todo {
-  text: string;
-  completed: boolean;
-}
-
 const App: React.FC = () => {
-  const [Todos, setTodos] = useState<Todo[]>(() => {
-    const todos = localStorage.getItem('todos');
-    return todos ? JSON.parse(todos) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(Todos));
-  }, [Todos]);
+  const todos = useSelector((state: RootState) => state.todos.todos);
+  const dispatch: AppDispatch = useDispatch();
 
   const [inputValue, setInputValue] = useState<string>('');
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
+
+  useEffect(() => {
+    dispatch(saveTodos());
+  }, [todos, dispatch]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -25,23 +23,85 @@ const App: React.FC = () => {
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      setTodos([...Todos, { text: inputValue, completed: false }]);
+      dispatch(addTodo(inputValue));
       setInputValue('');
     }
-    setInputValue('');
+  };
+
+  const handleEditInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  const handleEditSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (editValue.trim() && editIndex !== null) {
+      dispatch(editTodo({ index: editIndex, text: editValue }));
+      setEditIndex(null);
+      setEditValue('');
+    }
   };
 
   const handleToggleTodo = (index: number) => {
-    const newTodos = Todos.map((todo, idx) =>
-      idx === index ? { ...todo, completed: !todo.completed } : todo
-    );
-    setTodos(newTodos);
+    dispatch(toggleTodo(index));
   };
 
   const handleRemoveTodo = (index: number) => {
-    const newTodos = Todos.filter((_, idx) => idx !== index);
-    setTodos(newTodos);
+    dispatch(removeTodo(index));
   };
+
+  const handleEditTodo = (index: number, currentText: string) => {
+    setEditIndex(index);
+    setEditValue(currentText);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        dispatch(addTodo(inputValue));
+        setInputValue('');
+      }
+    } else if (e.key === 'Escape') {
+      setInputValue('');
+    } else if (e.key === 'Enter' && e.ctrlKey) {
+      if (todos.length > 0) {
+        handleToggleTodo(todos.length - 1);
+      }
+    } else if (e.key === 'Delete') {
+      e.preventDefault()
+      if (todos.length > 0) {
+        handleRemoveTodo(todos.length - 1);
+      }
+    }
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (editValue.trim() && editIndex !== null) {
+        dispatch(editTodo({ index: editIndex, text: editValue }));
+        setEditIndex(null);
+        setEditValue('');
+      }
+    } else if (e.key === 'Escape') {
+      setEditValue('');
+    }
+  };
+
+
+  useEffect(() => {
+    const handleKeyDownGlobal = (e: KeyboardEvent) => {
+      if (document.activeElement !== document.querySelector('.input')) {
+        handleKeyDown(e as unknown as React.KeyboardEvent<HTMLInputElement>);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDownGlobal);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDownGlobal);
+    };
+  }, [inputValue, todos]);
 
   return (
     <div className="container">
@@ -53,22 +113,45 @@ const App: React.FC = () => {
           placeholder="Add a new todo"
           value={inputValue}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
         />
         <button className="button" type="submit">
           Add Todo
         </button>
       </form>
       <ul className="list">
-        {Todos.map((todo, index) => (
-          <li
-            className="listItem"
-            key={index}
-            style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
-          >
-            <span className="todoText" onClick={() => handleToggleTodo(index)}>
-              {todo.text}
-            </span>
-            <button onClick={() => handleRemoveTodo(index)}>Remove</button>
+        {todos.map((todo, index) => (
+          <li className="listItem" key={index}>
+            {editIndex === index ? (
+              <form className="container" onSubmit={handleEditSubmit}>
+                <input
+                  className="input"
+                  type="text"
+                  value={editValue}
+                  onChange={handleEditInputChange}
+                  onKeyDown={handleEditKeyDown}
+                />
+                <button className="button" type="submit">
+                  Save
+                </button>
+              </form>
+            ) : (
+              <>
+                <span
+                  className="todoText"
+                  style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                  onClick={() => handleToggleTodo(index)}
+                >
+                  {todo.text}
+                </span>
+                <button className="button" onClick={() => handleEditTodo(index, todo.text)}>
+                  Edit
+                </button>
+                <button className="button" onClick={() => handleRemoveTodo(index)}>
+                  Remove
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>
