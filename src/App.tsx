@@ -1,20 +1,12 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from './store';
-import { addTodo, toggleTodo, removeTodo, editTodo, saveTodos } from './store/todosSlice';
+import useTodoStore from './store';
 import './App.css';
 
 const App: React.FC = () => {
-  const todos = useSelector((state: RootState) => state.todos.todos);
-  const dispatch: AppDispatch = useDispatch();
-
+  const {todos, addTodo, toggleTodo, removeTodo, editTodo} = useTodoStore()
   const [inputValue, setInputValue] = useState<string>('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
-
-  useEffect(() => {
-    dispatch(saveTodos());
-  }, [todos, dispatch]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -23,7 +15,7 @@ const App: React.FC = () => {
   const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      dispatch(addTodo(inputValue));
+      addTodo((inputValue))
       setInputValue('');
     }
   };
@@ -35,18 +27,18 @@ const App: React.FC = () => {
   const handleEditSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editValue.trim() && editIndex !== null) {
-      dispatch(editTodo({ index: editIndex, text: editValue }));
+      editTodo(editIndex, editValue)
       setEditIndex(null);
       setEditValue('');
     }
   };
 
   const handleToggleTodo = (index: number) => {
-    dispatch(toggleTodo(index));
+    toggleTodo(index);
   };
 
   const handleRemoveTodo = (index: number) => {
-    dispatch(removeTodo(index));
+    removeTodo(index);
   };
 
   const handleEditTodo = (index: number, currentText: string) => {
@@ -58,7 +50,7 @@ const App: React.FC = () => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
       e.preventDefault();
       if (inputValue.trim()) {
-        dispatch(addTodo(inputValue));
+        addTodo(inputValue);
         setInputValue('');
       }
     } else if (e.key === 'Escape') {
@@ -79,7 +71,7 @@ const App: React.FC = () => {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (editValue.trim() && editIndex !== null) {
-        dispatch(editTodo({ index: editIndex, text: editValue }));
+        editTodo(editIndex, editValue);
         setEditIndex(null);
         setEditValue('');
       }
