@@ -35,3 +35,38 @@
     cursor: pointer;
     margin-right: auto
   }
+
+/* Logical properties for padding and margin */
+.container {
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
+}
+
+.input, .button {
+  padding-inline-start: 10px;
+  padding-inline-end: 10px;
+}
+
+.list {
+  padding-inline-start: 0;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  padding-inline-start: 10px;
+  padding-inline-end: 10px;
+  margin-block-end: 10px;
+}
+
+.todoText {
+  flex-grow: 1;
+  padding-inline-start: 10px;
+  padding-inline-end: 10px;
+  cursor: pointer;
+}
+
+.button {
+  margin-inline-start: 5px;
+  margin-inline-end: 5px;
+}

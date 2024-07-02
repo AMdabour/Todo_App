@@ -1,13 +1,16 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from './store';
+import { useTranslation } from 'react-i18next';
 import { addTodo, toggleTodo, removeTodo, editTodo, saveTodos } from './store/todosSlice';
+import './i18n'
 import './App.css';
 
 const App: React.FC = () => {
   const todos = useSelector((state: RootState) => state.todos.todos);
   const dispatch: AppDispatch = useDispatch();
 
+  const [t, i18n] = useTranslation()
   const [inputValue, setInputValue] = useState<string>('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -15,6 +18,10 @@ const App: React.FC = () => {
   useEffect(() => {
     dispatch(saveTodos());
   }, [todos, dispatch]);
+
+  useEffect(() => {
+    document.body.dir = t('direction');
+  }, [t])
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -88,6 +95,10 @@ const App: React.FC = () => {
     }
   };
 
+  const switchLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'ar' : 'en';
+    i18n.changeLanguage(newLang);
+  }
 
   useEffect(() => {
     const handleKeyDownGlobal = (e: KeyboardEvent) => {
@@ -105,18 +116,19 @@ const App: React.FC = () => {
 
   return (
     <div className="container">
-      <h1>My Todo</h1>
+      <button onClick={switchLanguage}>{t('switchLanguage')}</button>
+      <h1>{t('title')}</h1>
       <form onSubmit={handleFormSubmit}>
         <input
           className="input"
           type="text"
-          placeholder="Add a new todo"
+          placeholder={t('placeholder')}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         />
         <button className="button" type="submit">
-          Add Todo
+          {t('addButton')}
         </button>
       </form>
       <ul className="list">
@@ -132,7 +144,7 @@ const App: React.FC = () => {
                   onKeyDown={handleEditKeyDown}
                 />
                 <button className="button" type="submit">
-                  Save
+                  {t('saveButton')}
                 </button>
               </form>
             ) : (
@@ -145,10 +157,10 @@ const App: React.FC = () => {
                   {todo.text}
                 </span>
                 <button className="button" onClick={() => handleEditTodo(index, todo.text)}>
-                  Edit
+                  {t('editButton')}
                 </button>
                 <button className="button" onClick={() => handleRemoveTodo(index)}>
-                  Remove
+                  {t('removeButton')}
                 </button>
               </>
             )}

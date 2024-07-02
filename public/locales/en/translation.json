@@ -1,0 +1,10 @@
+{
+    "title": "My Todo",
+    "placeholder": "Add a new todo",
+    "addButton": "Add Todo",
+    "editButton": "Edit",
+    "removeButton": "Remove",
+    "saveButton": "Save",
+    "switchLanguage": "Switch to Arabic",
+    "direction": "ltr"
+}
